@@ -36,38 +36,19 @@ def secure_page():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     form = LoginForm()
-   # if request.method == "POST":
-    if current_user.is_authenticated: # change this to actually validate the entire form submission
-        # and not just one field
-        if request.method == 'POST' and form.validate_on_submit():
-            # Get the username and password values from the form.
-            
+    if request.method == "POST" and form.validate_on_submit():
             username = form.username.data
             password = form.password.data
-            #return redirect(url_for('secure_page'))
-            
-            
-              
-                
-            user = UserProfile.query.filter_by(username=username, password=password).first()
-        if user is not None:
-            # using your model, query database for a user based on the username
-            # and password submitted
-            # store the result of that query to a `user` variable so it can be
-            # passed to the login_user() method.
-            
-            # get user id, load into session
+            print username,password
+            user = UserProfile.query.filter_by(username = username, password = password).first()
+            if user is not None:
                 login_user(user)
-                
-                flash('Logged in successfully.', 'success')
+                flash('Logged in successfully.')
                 next = request.args.get('next')
                 return redirect(url_for('secure_page'))
-        else:
-            flash('Username or Password is incorrect.', 'danger')
-
-    flash_errors(form)
-    return render_template('login.html', form=form)
-            # remember to flash a message to the user
+            else:
+                flash('Username or Password Invalid!')
+    return render_template("login.html", form = form)
   
 
 # user_loader callback. This callback is used to reload the user object from
@@ -84,6 +65,13 @@ def flash_errors(form):
                 getattr(form, field).label.text,
                 error
             ), 'danger')
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    flash('You have been logged out.')
+    return redirect(url_for('home'))
 
 
 ###
